@@ -1,0 +1,131 @@
+/*Turning LEDs on in order for a memory game
+By Zhino Yousefi & Ellie Huang
+Feb 2022
+*/
+
+int button = 6;//butttoon connected to pin 6 with a 10k pullup resistor
+int buttonstate = 0;//a  global variable to hold the state of the button
+int count = 0;//global variable for  counting button presses
+
+int LED1 = 10;//LEDs 1 to 4 light up a certain pattern on a 12 LED matrix
+int LED2 = 11;
+int LED3 = 12;
+int LED4 = 13;
+int buzzer = 9;
+
+int OR1 = 4;
+int ORstate1 = 0;
+int OR2 = 5;
+int ORstate2 = 0;
+int AND1 = 7;
+int ANDstate = 0;
+
+//variables for keeping track of time
+unsigned long previousMillis = 0;
+const long interval = 10000;//the interval to test if a button press is recent or not
+
+void setup() {
+  //LEDs are off by default
+  pinMode(LED1, OUTPUT);
+  pinMode(LED2, OUTPUT);
+  pinMode(LED3, OUTPUT);
+  pinMode(LED4, OUTPUT);
+  pinMode(buzzer, OUTPUT);
+  
+  pinMode(button,INPUT);
+  pinMode(OR1,INPUT);
+  pinMode(OR2,INPUT);
+  pinMode(AND1,INPUT);
+  Serial.begin(9600);
+}
+
+void loop() {
+  buttonstate = digitalRead(button);
+  ANDstate = digitalRead(AND1);
+  ORstate1 = digitalRead(OR1);
+  ORstate2 = digitalRead(OR2);
+  //if enough time has passed reset the counter to 0
+  if(buttonstate == 1 && count == 1){
+    Serial.println("Checking your request!");
+    CheckTimer();
+  }
+  
+  if(buttonstate == 1 && count == 0){
+    Serial.println(buttonstate);
+    digitalWrite(LED1,HIGH);
+    delay(500);
+    digitalWrite(LED2,HIGH);
+    delay(500);
+    digitalWrite(LED3,HIGH);
+    delay(500);
+    digitalWrite(LED4,HIGH);
+    delay(500);
+    count = 1;
+    previousMillis = millis();
+  }
+  digitalWrite(LED1,LOW);
+  digitalWrite(LED2,LOW);
+  digitalWrite(LED3,LOW);
+  digitalWrite(LED4,LOW);
+
+  //if the pattern is right
+  if(ANDstate == 1){//
+    //Success
+    Serial.println("Correct Pattern");
+    digitalWrite(LED1,HIGH);
+    digitalWrite(LED2,HIGH);
+    digitalWrite(LED3,HIGH);
+    digitalWrite(LED4,HIGH);
+    delay(300);
+    digitalWrite(LED1,LOW);
+    digitalWrite(LED2,LOW);
+    digitalWrite(LED3,LOW);
+    digitalWrite(LED4,LOW);
+    delay(300);
+    digitalWrite(LED1,HIGH);
+    digitalWrite(LED2,HIGH);
+    digitalWrite(LED3,HIGH);
+    digitalWrite(LED4,HIGH);
+    delay(300);
+    digitalWrite(LED1,LOW);
+    digitalWrite(LED2,LOW);
+    digitalWrite(LED3,LOW);
+    digitalWrite(LED4,LOW);
+    delay(300);
+    digitalWrite(LED1,HIGH);
+    digitalWrite(LED2,HIGH);
+    digitalWrite(LED3,HIGH);
+    digitalWrite(LED4,HIGH);
+    delay(3000);
+  }
+  else if(ORstate1 == 1 || ORstate2 == 1){
+    //Fail you pushed a wrong button
+    Serial.println("Wrong Pattern");   
+    digitalWrite(buzzer,HIGH);
+    delay(100);
+    digitalWrite(buzzer,LOW);
+    delay(100);
+    digitalWrite(buzzer,HIGH);
+    delay(100);
+    digitalWrite(buzzer,LOW);
+  }
+  
+  
+}
+//----------------Custom Functions------------------------
+
+void CheckTimer(){
+  unsigned long currentMillis = millis();//declare a variable to store the time
+  if(currentMillis - previousMillis <= interval){
+    Serial.println("Sorry, you just saw the pattern! :D ");
+    digitalWrite(buzzer,HIGH);
+    delay(80);
+    digitalWrite(buzzer,LOW);
+    delay(300);
+  }else{
+   Serial.println("Successful Request");
+   previousMillis = currentMillis;
+   count = 0;
+  }
+}
+//------------------------------------------------------------
